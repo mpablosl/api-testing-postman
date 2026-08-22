@@ -1,0 +1,22 @@
+# Segredos e credenciais
+.env
+.env.*
+*.secret
+secrets/
+credentials/
+
+# Environments locais do Postman
+*-local.postman_environment.json
+*-private.postman_environment.json
+
+# Dados potencialmente sensíveis
+*.password
+*.token
+evidence/raw/
+responses/raw/
+
+# Arquivos temporários
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
