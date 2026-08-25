@@ -2,79 +2,230 @@
 
 ## Objetivo
 
-Este projeto tem como objetivo demonstrar a aplicação prática de testes
-de API utilizando o Postman e o ServeRest.
+Este projeto demonstra a aplicação prática de testes de API utilizando Postman, ServeRest, JavaScript e Git.
 
-O projeto será desenvolvido progressivamente, começando pelos fundamentos
-de HTTP e API Testing e evoluindo para testes automatizados, autenticação,
-request chaining, execução de collections e integração contínua.
+O projeto contempla:
+
+- organização de Collections;
+- parametrização de URLs com variables;
+- testes positivos e negativos;
+- assertions automatizadas;
+- criação e consulta de usuários;
+- geração de dados dinâmicos;
+- request chaining;
+- execução de Collections;
+- versionamento com Git e GitHub.
+
+---
 
 ## Tecnologias e ferramentas
 
 - Postman
 - ServeRest
+- JavaScript
 - Git
 - GitHub
 - Markdown
 
+---
+
 ## API utilizada
 
-ServeRest.
+[ServeRest](https://serverest.dev/)
+
+---
 
 ## Escopo atual
 
-Nesta primeira etapa, foi realizada uma consulta de usuários utilizando
-o método `GET`.
+Até o momento, foram implementados testes para:
 
-### Endpoint testado
+- consulta de usuários;
+- criação de usuários;
+- validações automatizadas de responses;
+- geração dinâmica de dados para cadastro;
+- organização da Collection;
+- utilização de variável para a URL base.
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| GET | `/usuarios` | Consultar usuários |
+---
 
-## Cenário executado
+## Estrutura da Collection
+
+```text
+ServeRest - API Testing
+├── Authentication
+│   └── Login
+├── Users
+│   ├── List Users
+│   ├── Get User
+│   ├── Create User
+│   ├── Update User
+│   └── Delete User
+└── Products
+    ├── List Products
+    ├── Get Product
+    ├── Create Product
+    ├── Update Product
+    └── Delete Product
+```
+
+As requests foram organizadas por domínio funcional:
+
+- `Authentication`: autenticação;
+- `Users`: operações relacionadas a usuários;
+- `Products`: operações relacionadas a produtos.
+
+---
+
+## Environment
+
+Foi criado o Environment:
+
+```text
+ServeRest - QA
+```
+
+Variável configurada:
+
+| Variável | Valor |
+|---|---|
+| `baseurl` | `https://serverest.dev` |
+
+As requests utilizam a variável da seguinte forma:
+
+```text
+{{baseurl}}/usuarios
+```
+
+---
+
+## Casos de teste
 
 ### CT-001 — Consultar usuários existentes
 
-- Método: `GET`
-- Endpoint: `/usuarios`
-- Autenticação: não necessária
-- Request body: ausente
-- Status esperado: `200`
-- Status obtido: `200`
-- Response: JSON
-- Resultado: aprovado parcialmente
+| Campo | Informação |
+|---|---|
+| Método | GET |
+| Endpoint | `/usuarios` |
+| Autenticação | Não necessária |
+| Request body | Ausente |
+| Status esperado | 200 |
+| Status obtido | 200 |
+| Response | JSON |
+| Resultado | Aprovado |
 
-## Validações realizadas
+#### Validações automatizadas
 
-- Verificação do método HTTP.
-- Verificação do endpoint.
-- Verificação da ausência de request body.
-- Verificação da necessidade de autenticação.
-- Validação do status code `200`.
-- Validação do formato JSON.
-- Identificação da propriedade `quantidade`.
-- Identificação da propriedade `usuarios`.
-- Identificação dos campos `nome` e `email`.
+- O status code deve ser `200`.
+- A response deve estar em formato JSON.
+- A propriedade `quantidade` deve existir.
+- A propriedade `usuarios` deve existir.
+- A propriedade `usuarios` deve ser um array.
+- `quantidade` deve ser um número.
+- `quantidade` deve corresponder ao tamanho do array `usuarios`.
+- Cada usuário deve possuir `nome`.
+- Cada usuário deve possuir `email`.
+- `nome` e `email` devem ser textos.
 
-## Validações pendentes
+---
 
-- Criar assertions automatizadas no Postman.
-- Validar os tipos dos campos.
-- Validar a estrutura dos objetos.
-- Validar a consistência entre `quantidade` e a lista `usuarios`.
-- Criar cenários negativos.
-- Organizar a Collection do Postman.
+### CT-002 — Criar usuário com dados válidos
+
+| Campo | Informação |
+|---|---|
+| Método | POST |
+| Endpoint | `/usuarios` |
+| Autenticação | Não necessária |
+| Request body | JSON |
+| Status esperado | 201 |
+| Status obtido | 201 |
+| Resultado | Aprovado |
+
+#### Dados utilizados
+
+Os dados de cadastro são gerados dinamicamente antes da execução da request.
+
+Exemplo de script:
+
+```javascript
+const timestamp = Date.now();
+
+pm.variables.set("newUserName", `QA User ${timestamp}`);
+pm.variables.set("newUserEmail", `qa${timestamp}@example.com`);
+pm.variables.set("newUserPassword", "SenhaTeste@123");
+pm.variables.set("newUserAdmin", "false");
+```
+
+#### Validações automatizadas
+
+- O status code deve ser `201`.
+- A response deve estar em formato JSON.
+- A mensagem deve indicar que o cadastro foi realizado com sucesso.
+- A response deve conter `_id`.
+- O `_id` deve ser um texto não vazio.
+
+#### Observação
+
+As senhas utilizadas são exclusivamente dados de teste e não devem ser publicadas como credenciais reais.
+
+---
+
+## Endpoints implementados
+
+| Método | Endpoint | Descrição | Status |
+|---|---|---|---|
+| GET | `/usuarios` | Consultar usuários | Implementado |
+| POST | `/usuarios` | Criar usuário | Implementado |
+| GET | `/usuarios/{id}` | Consultar usuário por ID | Próximo passo |
+| PUT | `/usuarios/{id}` | Atualizar usuário | Pendente |
+| DELETE | `/usuarios/{id}` | Excluir usuário | Pendente |
+| POST | `/login` | Realizar login | Pendente |
+| GET | `/produtos` | Consultar produtos | Pendente |
+| POST | `/produtos` | Criar produto | Pendente |
+
+---
+
+## Scripts utilizados
+
+### `List Users`
+
+A request possui assertions para validar:
+
+- status code;
+- formato da response;
+- propriedades obrigatórias;
+- tipos de dados;
+- consistência entre `quantidade` e `usuarios`.
+
+### `Create User`
+
+A request possui:
+
+- geração de dados dinâmicos;
+- body JSON parametrizado;
+- validação de cadastro bem-sucedido;
+- validação do `_id` retornado.
+
+---
 
 ## Observações técnicas
 
-Foi identificado o campo `password` no response body da consulta de usuários.
-Essa ocorrência foi registrada para análise separada.
+Durante a análise inicial da consulta de usuários, foi identificado o campo `password` na response body.
 
-Consulte:
+Essa ocorrência foi registrada para análise separada em:
 
-- [Casos de teste](documentation/test-cases.md)
-- [Observações técnicas](documentation/observations.md)
+```text
+documentation/observations.md
+```
+
+A presença de dados sensíveis ou potencialmente sensíveis em responses deve ser avaliada conforme:
+
+- necessidade funcional;
+- exposição indevida;
+- mascaramento;
+- política de segurança;
+- contrato esperado da API.
+
+---
 
 ## Estrutura do projeto
 
@@ -84,6 +235,7 @@ api-testing-postman/
 │   ├── test-cases.md
 │   └── observations.md
 ├── collections/
+│   └── ServeRest - API Testing.postman_collection.json
 ├── environments/
 ├── test-data/
 ├── evidence/
@@ -91,13 +243,44 @@ api-testing-postman/
 └── .gitignore
 ```
 
+---
+
 ## Próximas etapas
 
-1. Criar uma Collection no Postman.
-2. Adicionar a request de consulta de usuários.
-3. Criar as primeiras assertions.
-4. Testar o cadastro de usuários.
-5. Criar cenários positivos e negativos.
-6. Trabalhar com autenticação e tokens.
-7. Implementar request chaining.
-8. Executar a Collection automaticamente.
+1. Capturar o `_id` retornado pelo cadastro.
+2. Consultar o usuário criado com `GET /usuarios/{id}`.
+3. Implementar atualização de usuário.
+4. Implementar exclusão de usuário.
+5. Criar cenários negativos para usuários.
+6. Implementar login.
+7. Capturar e reutilizar token.
+8. Testar produtos.
+9. Executar a Collection completa.
+10. Atualizar evidências e documentação.
+11. Integrar a execução ao processo de versionamento.
+
+---
+
+## Status do projeto
+
+O projeto está em desenvolvimento incremental.
+
+### Implementado
+
+- Collection organizada;
+- Environment configurado;
+- variável `baseurl`;
+- consulta de usuários;
+- assertions automatizadas;
+- criação de usuário;
+- dados dinâmicos para cadastro;
+- documentação inicial.
+
+### Em desenvolvimento
+
+- request chaining;
+- consulta por ID;
+- atualização e exclusão;
+- autenticação;
+- testes de produtos;
+- execução completa da Collection.

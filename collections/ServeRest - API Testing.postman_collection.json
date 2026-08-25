@@ -1,0 +1,273 @@
+{
+  "info": {
+    "_postman_id": "64af1d86-e46b-4255-9b35-b592df9db3d6",
+    "name": "ServeRest - API Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44827811",
+    "_collection_link": "https://go.postman.co/collection/44827811-64af1d86-e46b-4255-9b35-b592df9db3d6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve estar em formato JSON\", function(){\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve conter a propriedade quantidade\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property(\"quantidade\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve conter a propriedade usuarios\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property(\"usuarios\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A propriedade usuarios deve ser um array\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.usuarios).to.be.an(\"array\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantidade deve ser um número\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.quantidade).to.be.a(\"number\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantidade deve corresponder o número de usuários retornados\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.quantidade).to.equal(response.usuarios.length);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cada usuário deve possuir nome e email\", function(usuario){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    response.usuarios.forEach(function(usuario){\r",
+                  "        pm.expect(usuario).to.have.property(\"nome\");\r",
+                  "        pm.expect(usuario).to.have.property(\"email\");\r",
+                  "    });\r",
+                  "    \r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Nome e email devem ser textos\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    response.usuarios.forEach(function(usuario){\r",
+                  "\r",
+                  "        pm.expect(usuario.nome).to.be.a(\"string\");\r",
+                  "        pm.expect(usuario.email).to.be.a(\"string\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/usuarios",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code deve ser 201\", function(){\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Cadastro deve ser realizado com sucesso\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.message).to.eql(\"Cadastro realizado com sucesso\");\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response deve conter o ID do usuário\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property(\"_id\");\r",
+                  "    pm.expect(response._id).to.be.a(\"string\").and.not.empty;\r",
+                  "});\r",
+                  "\r",
+                  "const response = pm.response.json();\r",
+                  "\r",
+                  "pm.environment.set(\"userId\", response._id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "/* Gerar Dados Dinâmicos para Testes de cadastro de usuários */\r",
+                  "const timestamp = Date.now();\r",
+                  "\r",
+                  "pm.variables.set(\"newUserName\", `QA User ${timestamp}`);\r",
+                  "pm.variables.set(\"newUserEmail\", `qa${timestamp}@example.com`);\r",
+                  "pm.variables.set(\"newUserPassword\", \"SenhaTeste@123\");\r",
+                  "pm.variables.set(\"newUserAdmin\", \"false\");\r",
+                  "\r",
+                  "console.log(\"newUserName\", pm.variables.get(\"newUserName\"));\r",
+                  "console.log(\"newUserEmail\", pm.variables.get(\"newUserEmail\"));\r",
+                  "console.log(\"newUserAdmin\", pm.variables.get(\"newUserAdmin\"))"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"{{newUserName}}\",\r\n    \"email\": \"{{newUserEmail}}\",\r\n    \"password\": \"{{newUserPassword}}\",\r\n    \"administrador\": \"{{newUserAdmin}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/usuarios",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://serverest.dev/produtos",
+              "protocol": "https",
+              "host": [
+                "serverest",
+                "dev"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": []
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
