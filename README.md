@@ -45,6 +45,15 @@ Até o momento, foram implementados testes para:
 - geração dinâmica de dados para cadastro;
 - organização da Collection;
 - utilização de variável para a URL base.
+- consulta de usuário por ID;
+- reutilização do identificador retornado pelo cadastro;
+- request chaining entre criação e consulta.
+- atualização de usuário existente;
+- validação da resposta de alteração;
+- reutilização do identificador do usuário.
+- cenário negativo de atualização com email duplicado;
+- validação de rejeição de dados inválidos;
+- confirmação de que o registro original não foi alterado.
 
 ---
 
@@ -140,6 +149,25 @@ As requests utilizam a variável da seguinte forma:
 | Status obtido | 201 |
 | Resultado | Aprovado |
 
+### CT-003 — Consultar usuário criado por ID
+
+| Campo | Informação |
+|---|---|
+| ID | CT-003 |
+| Cenário | Consultar usuário criado por ID |
+| Método | GET |
+| Endpoint | `/usuarios/{id}` |
+| Autenticação | Não necessária |
+| Request body | Ausente |
+| Status esperado | 200 |
+| Resultado esperado | Dados do usuário criado são retornados |
+| Resultado | A preencher após a execução |
+
+### Pré-condição
+
+O caso depende da execução prévia do `CT-002`, que salva o `_id`
+retornado pela API na variável `userId`.
+
 #### Dados utilizados
 
 Os dados de cadastro são gerados dinamicamente antes da execução da request.
@@ -163,6 +191,110 @@ pm.variables.set("newUserAdmin", "false");
 - A response deve conter `_id`.
 - O `_id` deve ser um texto não vazio.
 
+
+### CT-004 — Atualizar usuário existente
+
+| Campo | Informação |
+|---|---|
+| ID | CT-004 |
+| Cenário | Atualizar usuário existente |
+| Método | PUT |
+| Endpoint | `/usuarios/{id}` |
+| Autenticação | Não necessária |
+| Request body | JSON |
+| Status esperado | 200 |
+| Resultado esperado | Usuário atualizado com sucesso |
+| Resultado | A preencher após a execução |
+
+### Pré-condição
+
+O caso depende da execução prévia do `CT-002`, que cria o usuário
+e salva o `_id` na variável `userId`.
+
+### Validações
+
+- O status code deve ser `200`.
+- A response deve estar em formato JSON.
+- A response deve conter `message`.
+- A mensagem deve ser `Registro alterado com sucesso`.
+
+### CT-005 — Atualizar usuário com email duplicado
+
+| Campo | Informação |
+|---|---|
+| ID | CT-005 |
+| Cenário | Atualizar usuário usando email já cadastrado |
+| Método | PUT |
+| Endpoint | `/usuarios/{id}` |
+| Autenticação | Não necessária |
+| Request body | JSON |
+| Status esperado | 400 |
+| Resultado esperado | Atualização rejeitada |
+| Resultado | A preencher após a execução |
+
+### Pré-condições
+
+- Deve existir um usuário criado.
+- Deve existir outro usuário com email diferente.
+- O `userId` deve representar o usuário que será atualizado.
+- O email enviado no body deve pertencer a outro usuário.
+
+### Validações
+
+- O status code deve ser `400`.
+- A response deve estar em formato JSON.
+- A response deve informar erro relacionado ao email.
+- O usuário original não deve ser alterado.
+
+## CT-006 — Excluir usuário existente
+
+| Campo | Informação |
+|---|---|
+| ID | CT-006 |
+| Cenário | Excluir usuário existente |
+| Método | DELETE |
+| Endpoint | `/usuarios/{id}` |
+| Autenticação | Não necessária |
+| Request body | Ausente |
+| Status esperado | 200 |
+| Resultado esperado | Usuário excluído com sucesso |
+| Resultado | A preencher após a execução |
+
+### Pré-condição
+
+O `userId` deve corresponder a um usuário criado durante o fluxo de teste.
+
+### Validações
+
+- O status code deve ser `200`.
+- A response deve estar em formato JSON.
+- A response deve conter `message`.
+- A mensagem deve ser `Registro excluído com sucesso`.
+
+## CT-007 — Consultar usuário excluído
+
+| Campo | Informação |
+|---|---|
+| ID | CT-007 |
+| Cenário | Consultar usuário após exclusão |
+| Método | GET |
+| Endpoint | `/usuarios/{id}` |
+| Autenticação | Não necessária |
+| Request body | Ausente |
+| Status esperado | 400 |
+| Resultado esperado | Usuário não encontrado |
+| Resultado | A preencher após a execução |
+
+### Pré-condição
+
+O usuário deve ter sido excluído pelo caso `CT-006`.
+
+### Validações
+
+- O status code deve ser `400`.
+- A response deve estar em formato JSON.
+- A mensagem deve ser `Usuário não encontrado`.
+
 #### Observação
 
 As senhas utilizadas são exclusivamente dados de teste e não devem ser publicadas como credenciais reais.
@@ -175,9 +307,11 @@ As senhas utilizadas são exclusivamente dados de teste e não devem ser publica
 |---|---|---|---|
 | GET | `/usuarios` | Consultar usuários | Implementado |
 | POST | `/usuarios` | Criar usuário | Implementado |
-| GET | `/usuarios/{id}` | Consultar usuário por ID | Próximo passo |
-| PUT | `/usuarios/{id}` | Atualizar usuário | Pendente |
-| DELETE | `/usuarios/{id}` | Excluir usuário | Pendente |
+| GET | `/usuarios/{id}` | Consultar usuário por ID | Implementado |
+| PUT | `/usuarios/{id}` | Atualizar usuário | Implementado |
+| PUT | `/usuarios/{id}` | Atualizar usuário com email duplicado | Implementado |
+| DELETE | `/usuarios/{id}` | Excluir usuário | Implementado  |
+| GET | `/usuarios/{id}` | Validar usuário excluído | Implementado |
 | POST | `/login` | Realizar login | Pendente |
 | GET | `/produtos` | Consultar produtos | Pendente |
 | POST | `/produtos` | Criar produto | Pendente |
