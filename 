@@ -1,0 +1,412 @@
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 91bd52e..37d22e5 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -54,6 +54,18 @@[m [mAté o momento, foram implementados testes para:[m
+ - cenário negativo de atualização com email duplicado;[m
+ - validação de rejeição de dados inválidos;[m
+ - confirmação de que o registro original não foi alterado.[m
+[32m+[m[32m- consulta de produtos;[m
+[32m+[m[32m- validação da estrutura da lista de produtos.[m
+[32m+[m[32m- criação de usuário administrador;[m
+[32m+[m[32m- autenticação com login;[m
+[32m+[m[32m- captura e reutilização de token;[m
+[32m+[m[32m- criação autenticada de produtos;[m
+[32m+[m[32m- consulta de produto por ID;[m
+[32m+[m[32m- reutilização do identificador do produto;[m
+[32m+[m[32m- atualização de produtos;[m
+[32m+[m[32m- validação dos dados atualizados;[m
+[32m+[m[32m- exclusão de produtos;[m
+[32m+[m[32m- confirmação de que o produto excluído não pode mais ser consultado.[m
+ [m
+ ---[m
+ [m
+[36m@@ -97,7 +109,15 @@[m [mVariável configurada:[m
+ [m
+ | Variável | Valor |[m
+ |---|---|[m
+[31m-| `baseurl` | `https://serverest.dev` |[m
+[32m+[m[32m| `baseurl` | URL base da API |[m
+[32m+[m[32m| `userId` | Identificador do usuário criado |[m
+[32m+[m[32m| `adminUserName` | Nome do administrador de teste |[m
+[32m+[m[32m| `adminUserEmail` | Email do administrador de teste |[m
+[32m+[m[32m| `adminUserPassword` | Senha do administrador de teste |[m
+[32m+[m[32m| `authToken` | Token usado nas requisições autenticadas |[m
+[32m+[m[32m| `productId` | Identificador do produto criado |[m
+[32m+[m
+[32m+[m[32m> Valores de senha e token são utilizados somente para testes e não devem ser publicados no repositório.[m
+ [m
+ As requests utilizam a variável da seguinte forma:[m
+ [m
+[36m@@ -149,6 +169,10 @@[m [mAs requests utilizam a variável da seguinte forma:[m
+ | Status obtido | 201 |[m
+ | Resultado | Aprovado |[m
+ [m
+[32m+[m[32m#### Dados utilizados[m
+[32m+[m
+[32m+[m[32mOs dados de cadastro são gerados dinamicamente antes da execução da request.[m
+[32m+[m[32m---[m
+ ### CT-003 — Consultar usuário criado por ID[m
+ [m
+ | Campo | Informação |[m
+[36m@@ -185,13 +209,14 @@[m [mpm.variables.set("newUserAdmin", "false");[m
+ [m
+ #### Validações automatizadas[m
+ [m
+[31m-- O status code deve ser `201`.[m
+[32m+[m[32m- O status code deve ser `200`.[m
+ - A response deve estar em formato JSON.[m
+[31m-- A mensagem deve indicar que o cadastro foi realizado com sucesso.[m
+[31m-- A response deve conter `_id`.[m
+[31m-- O `_id` deve ser um texto não vazio.[m
+[31m-[m
+[32m+[m[32m- A response deve conter o `_id` consultado.[m
+[32m+[m[32m- O `_id` retornado deve ser igual ao valor armazenado em `userId`.[m
+[32m+[m[32m- A response deve conter `nome`.[m
+[32m+[m[32m- A response deve conter `email`.[m
+ [m
+[32m+[m[32m---[m
+ ### CT-004 — Atualizar usuário existente[m
+ [m
+ | Campo | Informação |[m
+[36m@@ -217,7 +242,7 @@[m [me salva o `_id` na variável `userId`.[m
+ - A response deve estar em formato JSON.[m
+ - A response deve conter `message`.[m
+ - A mensagem deve ser `Registro alterado com sucesso`.[m
+[31m-[m
+[32m+[m[32m---[m
+ ### CT-005 — Atualizar usuário com email duplicado[m
+ [m
+ | Campo | Informação |[m
+[36m@@ -245,7 +270,7 @@[m [me salva o `_id` na variável `userId`.[m
+ - A response deve estar em formato JSON.[m
+ - A response deve informar erro relacionado ao email.[m
+ - O usuário original não deve ser alterado.[m
+[31m-[m
+[32m+[m[32m---[m
+ ## CT-006 — Excluir usuário existente[m
+ [m
+ | Campo | Informação |[m
+[36m@@ -270,7 +295,7 @@[m [mO `userId` deve corresponder a um usuário criado durante o fluxo de teste.[m
+ - A response deve estar em formato JSON.[m
+ - A response deve conter `message`.[m
+ - A mensagem deve ser `Registro excluído com sucesso`.[m
+[31m-[m
+[32m+[m[32m---[m
+ ## CT-007 — Consultar usuário excluído[m
+ [m
+ | Campo | Informação |[m
+[36m@@ -294,7 +319,186 @@[m [mO usuário deve ter sido excluído pelo caso `CT-006`.[m
+ - O status code deve ser `400`.[m
+ - A response deve estar em formato JSON.[m
+ - A mensagem deve ser `Usuário não encontrado`.[m
+[32m+[m[32m---[m
+[32m+[m[32m## CT-008 — Consultar produtos existentes[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-008 |[m
+[32m+[m[32m| Cenário | Consultar produtos existentes |[m
+[32m+[m[32m| Método | GET |[m
+[32m+[m[32m| Endpoint | `/produtos` |[m
+[32m+[m[32m| Autenticação | Não necessária |[m
+[32m+[m[32m| Request body | Ausente |[m
+[32m+[m[32m| Status esperado | 200 |[m
+[32m+[m[32m| Resultado esperado | Lista de produtos retornada em JSON |[m
+[32m+[m[32m| Resultado | A preencher após a execução |[m
+[32m+[m
+[32m+[m[32m### Validações[m
+[32m+[m
+[32m+[m[32m- O status code deve ser `200`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A propriedade `quantidade` deve existir.[m
+[32m+[m[32m- A propriedade `produtos` deve existir.[m
+[32m+[m[32m- `produtos` deve ser um array.[m
+[32m+[m[32m- `quantidade` deve ser um número.[m
+[32m+[m[32m- `quantidade` deve corresponder ao tamanho do array `produtos`.[m
+[32m+[m[32m---[m
+[32m+[m[32m### CT-009 — Criar usuário administrador[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-009 |[m
+[32m+[m[32m| Cenário | Criar usuário administrador |[m
+[32m+[m[32m| Método | POST |[m
+[32m+[m[32m| Endpoint | `/usuarios` |[m
+[32m+[m[32m| Autenticação | Não necessária |[m
+[32m+[m[32m| Request body | JSON |[m
+[32m+[m[32m| Status esperado | 201 |[m
+[32m+[m[32m| Resultado esperado | Administrador criado com sucesso |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m- O status code deve ser `200`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A response deve conter `authorization`.[m
+[32m+[m[32m- O token deve ser salvo na variável `authToken`.[m
+[32m+[m[32m---[m
+[32m+[m[32m### CT-011 — Criar produto com dados válidos[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-011 |[m
+[32m+[m[32m| Cenário | Criar produto autenticado |[m
+[32m+[m[32m| Método | POST |[m
+[32m+[m[32m| Endpoint | `/produtos` |[m
+[32m+[m[32m| Autenticação | Bearer token |[m
+[32m+[m[32m| Request body | JSON |[m
+[32m+[m[32m| Status esperado | 201 |[m
+[32m+[m[32m| Resultado esperado | Produto criado com sucesso |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m### Pré-condições[m
+[32m+[m[32m- Deve existir um usuário administrador.[m
+[32m+[m[32m- O login deve ter sido realizado com sucesso.[m
+[32m+[m[32m- O token deve estar salvo na variável `authToken`.[m
+[32m+[m
+[32m+[m[32m### Validações[m
+[32m+[m[32m- O status code deve ser `201`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A response deve conter `message`.[m
+[32m+[m[32m- A mensagem deve ser `Cadastro realizado com sucesso`.[m
+[32m+[m[32m- A response deve conter `_id`.[m
+[32m+[m[32m- O `_id` deve ser um texto não vazio.[m
+[32m+[m[32m- O identificador deve ser salvo na variável `productId`.[m
+[32m+[m[32m---[m
+[32m+[m[32m### CT-012 — Consultar produto criado por ID[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-012 |[m
+[32m+[m[32m| Cenário | Consultar produto criado por ID |[m
+[32m+[m[32m| Método | GET |[m
+[32m+[m[32m| Endpoint | `/produtos/{id}` |[m
+[32m+[m[32m| Autenticação | Não necessária |[m
+[32m+[m[32m| Request body | Ausente |[m
+[32m+[m[32m| Status esperado | 200 |[m
+[32m+[m[32m| Resultado esperado | Dados do produto criado são retornados |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m### Pré-condições[m
+[32m+[m
+[32m+[m[32mO caso depende da execução prévia do CT-011, que salva o `_id` retornado pela API na variável `productId`.[m
+[32m+[m
+[32m+[m[32m### Validações[m
+ [m
+[32m+[m[32m- O status code deve ser `200`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- O `_id` retornado deve ser igual ao valor armazenado em `productId`.[m
+[32m+[m[32m- O produto deve conter `nome`.[m
+[32m+[m[32m- O produto deve conter `preco`.[m
+[32m+[m[32m- O produto deve conter `descricao`.[m
+[32m+[m[32m- O produto deve conter `quantidade`.[m
+[32m+[m[32m- `preco` deve ser numérico.[m
+[32m+[m[32m- `quantidade` deve ser numérica.[m
+[32m+[m[32m---[m
+[32m+[m[32m## CT-013 — Atualizar produto existente[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-013 |[m
+[32m+[m[32m| Cenário | Atualizar produto existente |[m
+[32m+[m[32m| Método | PUT |[m
+[32m+[m[32m| Endpoint | `/produtos/{id}` |[m
+[32m+[m[32m| Autenticação | Bearer token |[m
+[32m+[m[32m| Request body | JSON |[m
+[32m+[m[32m| Status esperado | 200 |[m
+[32m+[m[32m| Resultado esperado | Produto atualizado com sucesso |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m### Pré-condições[m
+[32m+[m
+[32m+[m[32m- Deve existir um usuário administrador.[m
+[32m+[m[32m- O login deve ter sido realizado com sucesso.[m
+[32m+[m[32m- O token deve estar salvo em `authToken`.[m
+[32m+[m[32m- Deve existir um produto criado.[m
+[32m+[m[32m- O identificador deve estar salvo em `productId`.[m
+[32m+[m
+[32m+[m[32m### Validações[m
+[32m+[m
+[32m+[m[32m- O status code deve ser `200`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A mensagem deve ser `Registro alterado com sucesso`.[m
+[32m+[m[32m- Os dados atualizados devem ser confirmados com `GET /produtos/{id}`.[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## CT-014 — Excluir produto existente[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-014 |[m
+[32m+[m[32m| Cenário | Excluir produto existente |[m
+[32m+[m[32m| Método | DELETE |[m
+[32m+[m[32m| Endpoint | `/produtos/{id}` |[m
+[32m+[m[32m| Autenticação | Bearer token |[m
+[32m+[m[32m| Request body | Ausente |[m
+[32m+[m[32m| Status esperado | 200 |[m
+[32m+[m[32m| Resultado esperado | Produto excluído com sucesso |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m### Validações[m
+[32m+[m
+[32m+[m[32m- O status code deve ser `200`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A response deve conter `message`.[m
+[32m+[m[32m- A mensagem deve ser `Registro excluído com sucesso`.[m
+[32m+[m
+[32m+[m[32m---[m
+[32m+[m
+[32m+[m[32m## CT-015 — Consultar produto excluído[m
+[32m+[m
+[32m+[m[32m| Campo | Informação |[m
+[32m+[m[32m|---|---|[m
+[32m+[m[32m| ID | CT-015 |[m
+[32m+[m[32m| Cenário | Consultar produto após exclusão |[m
+[32m+[m[32m| Método | GET |[m
+[32m+[m[32m| Endpoint | `/produtos/{id}` |[m
+[32m+[m[32m| Autenticação | Não necessária |[m
+[32m+[m[32m| Request body | Ausente |[m
+[32m+[m[32m| Status esperado | 400 |[m
+[32m+[m[32m| Resultado esperado | Produto não encontrado |[m
+[32m+[m[32m| Resultado | Aprovado |[m
+[32m+[m
+[32m+[m[32m### Pré-condição[m
+[32m+[m
+[32m+[m[32mO produto deve ter sido excluído pelo caso `CT-014`.[m
+[32m+[m
+[32m+[m[32m### Validações[m
+[32m+[m
+[32m+[m[32m- O status code deve ser `400`.[m
+[32m+[m[32m- A response deve estar em formato JSON.[m
+[32m+[m[32m- A mensagem deve ser `Produto não encontrado`.[m
+[32m+[m
+[32m+[m[32m---[m
+ #### Observação[m
+ [m
+ As senhas utilizadas são exclusivamente dados de teste e não devem ser publicadas como credenciais reais.[m
+[36m@@ -310,11 +514,15 @@[m [mAs senhas utilizadas são exclusivamente dados de teste e não devem ser publica[m
+ | GET | `/usuarios/{id}` | Consultar usuário por ID | Implementado |[m
+ | PUT | `/usuarios/{id}` | Atualizar usuário | Implementado |[m
+ | PUT | `/usuarios/{id}` | Atualizar usuário com email duplicado | Implementado |[m
+[31m-| DELETE | `/usuarios/{id}` | Excluir usuário | Implementado  |[m
+[32m+[m[32m| DELETE | `/usuarios/{id}` | Excluir usuário | Implementado |[m
+ | GET | `/usuarios/{id}` | Validar usuário excluído | Implementado |[m
+[31m-| POST | `/login` | Realizar login | Pendente |[m
+[31m-| GET | `/produtos` | Consultar produtos | Pendente |[m
+[31m-| POST | `/produtos` | Criar produto | Pendente |[m
+[32m+[m[32m| POST | `/login` | Realizar login | Implementado |[m
+[32m+[m[32m| GET | `/produtos` | Consultar produtos | Implementado |[m
+[32m+[m[32m| POST | `/produtos` | Criar produto autenticado | Implementado |[m
+[32m+[m[32m| GET | `/produtos/{id}` | Consultar produto por ID | Implementado |[m
+[32m+[m[32m| PUT | `/produtos/{id}` | Atualizar produto | Implementado |[m
+[32m+[m[32m| DELETE | `/produtos/{id}` | Excluir produto | Implementado |[m
+[32m+[m[32m| GET | `/produtos/{id}` | Validar produto excluído | Implementado |[m
+ [m
+ ---[m
+ [m
+[36m@@ -339,8 +547,49 @@[m [mA request possui:[m
+ - validação de cadastro bem-sucedido;[m
+ - validação do `_id` retornado.[m
+ [m
+[32m+[m[32m### `Login`[m
+[32m+[m
+[32m+[m[32mA request possui:[m
+[32m+[m
+[32m+[m[32m- body JSON com email e senha parametrizados;[m
+[32m+[m[32m- validação do status code;[m
+[32m+[m[32m- validação da presença de `authorization`;[m
+[32m+[m[32m- armazenamento do token na variável `authToken`;[m
+[32m+[m[32m- reutilização do token em requests autenticadas.[m
+[32m+[m
+[32m+[m[32m### `List Products`[m
+[32m+[m
+[32m+[m[32mA request possui assertions para validar:[m
+[32m+[m
+[32m+[m[32m- status code;[m
+[32m+[m[32m- formato JSON;[m
+[32m+[m[32m- propriedade `quantidade`;[m
+[32m+[m[32m- propriedade `produtos`;[m
+[32m+[m[32m- tipo da lista;[m
+[32m+[m[32m- consistência entre `quantidade` e a quantidade de itens retornados.[m
+ ---[m
+ [m
+[32m+[m[32m### `Create Product`[m
+[32m+[m
+[32m+[m[32mA request possui:[m
+[32m+[m
+[32m+[m[32m- autenticação com Bearer token;[m
+[32m+[m[32m- body JSON parametrizado;[m
+[32m+[m[32m- validação do status code;[m
+[32m+[m[32m- validação da mensagem de sucesso;[m
+[32m+[m[32m- validação do `_id` retornado;[m
+[32m+[m[32m- armazenamento do identificador na variável `productId`.[m
+[32m+[m
+[32m+[m[32m### `Get Product`[m
+[32m+[m
+[32m+[m[32mA request possui:[m
+[32m+[m
+[32m+[m[32m- reutilização da variável `productId`;[m
+[32m+[m[32m- validação do status code;[m
+[32m+[m[32m- validação do formato JSON;[m
+[32m+[m[32m- validação da identidade do produto consultado;[m
+[32m+[m[32m- validação dos campos `nome`, `preco`, `descricao` e `quantidade`.[m
+[32m+[m
+ ## Observações técnicas[m
+ [m
+ Durante a análise inicial da consulta de usuários, foi identificado o campo `password` na response body.[m
+[36m@@ -381,17 +630,10 @@[m [mapi-testing-postman/[m
+ [m
+ ## Próximas etapas[m
+ [m
+[31m-1. Capturar o `_id` retornado pelo cadastro.[m
+[31m-2. Consultar o usuário criado com `GET /usuarios/{id}`.[m
+[31m-3. Implementar atualização de usuário.[m
+[31m-4. Implementar exclusão de usuário.[m
+[31m-5. Criar cenários negativos para usuários.[m
+[31m-6. Implementar login.[m
+[31m-7. Capturar e reutilizar token.[m
+[31m-8. Testar produtos.[m
+[31m-9. Executar a Collection completa.[m
+[31m-10. Atualizar evidências e documentação.[m
+[31m-11. Integrar a execução ao processo de versionamento.[m
+[32m+[m[32m1. Executar a Collection completa.[m
+[32m+[m[32m2. Atualizar evidências e documentação.[m
+[32m+[m[32m3. Revisar variáveis e credenciais antes do commit.[m
+[32m+[m[32m4. Integrar a execução ao processo de versionamento.[m
+ [m
+ ---[m
+ [m
+[36m@@ -404,17 +646,22 @@[m [mO projeto está em desenvolvimento incremental.[m
+ - Collection organizada;[m
+ - Environment configurado;[m
+ - variável `baseurl`;[m
+[31m-- consulta de usuários;[m
+[32m+[m[32m- CRUD de usuários;[m
+[32m+[m[32m- cenários positivos e negativos para usuários;[m
+[32m+[m[32m- criação de usuário administrador;[m
+[32m+[m[32m- autenticação com login;[m
+[32m+[m[32m- captura e reutilização de token;[m
+[32m+[m[32m- CRUD de produtos;[m
+[32m+[m[32m- consulta de produto após atualização;[m
+[32m+[m[32m- confirmação de produto excluído;[m
+ - assertions automatizadas;[m
+[31m-- criação de usuário;[m
+[31m-- dados dinâmicos para cadastro;[m
+[31m-- documentação inicial.[m
+[32m+[m[32m- geração de dados dinâmicos;[m
+[32m+[m[32m- request chaining com `userId`, `authToken` e `productId`;[m
+[32m+[m[32m- documentação dos casos de teste.[m
+ [m
+ ### Em desenvolvimento[m
+ [m
+[31m-- request chaining;[m
+[31m-- consulta por ID;[m
+[31m-- atualização e exclusão;[m
+[31m-- autenticação;[m
+[31m-- testes de produtos;[m
+[31m-- execução completa da Collection.[m
+\ No newline at end of file[m
+[32m+[m[32m- execução completa da Collection;[m
+[32m+[m[32m- atualização das evidências;[m
+[32m+[m[32m- revisão final do projeto;[m
+[32m+[m[32m- integração da execução ao processo de versionamento.[m
+\ No newline at end of file[m

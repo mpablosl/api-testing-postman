@@ -321,52 +321,6 @@
           "response": []
         },
         {
-          "name": "Get Deleted User",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser 400\", function(){\r",
-                  "    pm.response.to.have.status(400);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Response deve estar em formato JSON\", function(){\r",
-                  "    pm.response.to.be.json;\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Response deve informar que o usuário não foi encontrado\", function(){\r",
-                  "    const response = pm.response.json();\r",
-                  "\r",
-                  "    pm.expect(response.message).to.eql(\"Usuário não encontrado\");\r",
-                  "})"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseurl}}/usuarios/{{userId}}",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "usuarios",
-                "{{userId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Update User",
           "event": [
             {
@@ -453,6 +407,61 @@
           "response": []
         },
         {
+          "name": "Updade User - Duplicate Email",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();\r\n\r\npm.variables.set(\"updatedUserName\", `QA User Updated ${timestamp}`);\r\npm.variables.set(\"updatedUserEmail\", `login_1787765636589@teste.com`);\r\npm.variables.set(\"updatedPassword\", \"SenhaAtualizada@123\");\r\npm.variables.set(\"updatedUserAdmin\",\"false\")"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"A mensagem deve ser 400\", function(){\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response deve estar em formato Json\", function(){\r\n    pm.response.to.be.json;\r\n});\r\n\r\npm.test(\"Response deve conter a mensagem de erro\", function(){\r\n    const response = pm.response.json();\r\n    pm.expect(response.message).to.be.eql(\"Este email já está sendo usado\");\r\n});\r\n\r\npm.test(\"Response deve conter mensagem de erro\", function(){\r\n    const response = pm.response.json();\r\n\r\n    pm.expect(response).to.be.an(\"object\");\r\n    pm.expect(Object.keys(response).length).to.be.greaterThan(0);\r\n})"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"{{updatedUserName}}\",\r\n    \"email\": \"{{updatedUserEmail}}\",\r\n    \"password\": \"{{updatedPassword}}\",\r\n    \"administrador\": \"{{updatedUserAdmin}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/usuarios/{{userId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Delete User",
           "event": [
             {
@@ -518,46 +527,24 @@
           "response": []
         },
         {
-          "name": "Updade User - Duplicate Email",
+          "name": "Get Deleted User",
           "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "const timestamp = Date.now();\r",
-                  "\r",
-                  "pm.variables.set(\"updatedUserName\", `QA User Updated ${timestamp}`);\r",
-                  "pm.variables.set(\"updatedUserEmail\", `login_1787765636589@teste.com`);\r",
-                  "pm.variables.set(\"updatedPassword\", \"SenhaAtualizada@123\");\r",
-                  "pm.variables.set(\"updatedUserAdmin\",\"false\")"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Response deve estar em formato Json\", function(){\r",
-                  "    pm.response.to.be.json;\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"A mensagem deve ser 400\", function(){\r",
+                  "pm.test(\"Status code deve ser 400\", function(){\r",
                   "    pm.response.to.have.status(400);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response deve conter a mensagem de erro\", function(){\r",
-                  "    const response = pm.response.json();\r",
-                  "    pm.expect(response.message).to.be.eql(\"Este email já está sendo usado\");\r",
+                  "pm.test(\"Response deve estar em formato JSON\", function(){\r",
+                  "    pm.response.to.be.json;\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Response deve conter mensagem de erro\", function(){\r",
+                  "pm.test(\"Response deve informar que o usuário não foi encontrado\", function(){\r",
                   "    const response = pm.response.json();\r",
                   "\r",
-                  "    pm.expect(response).to.be.an(\"object\");\r",
-                  "    pm.expect(Object.keys(response).length).to.be.greaterThan(0);\r",
+                  "    pm.expect(response.message).to.eql(\"Usuário não encontrado\");\r",
                   "})"
                 ],
                 "type": "text/javascript",
@@ -570,18 +557,8 @@
             "auth": {
               "type": "noauth"
             },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"nome\": \"{{updatedUserName}}\",\r\n    \"email\": \"{{updatedUserEmail}}\",\r\n    \"password\": \"{{updatedPassword}}\",\r\n    \"administrador\": \"{{updatedUserAdmin}}\"\r\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseurl}}/usuarios/{{userId}}",
               "host": [
@@ -817,7 +794,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status code deve ser 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter mensagem\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Produto deve ser criado com sucesso\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Cadastro realizado com sucesso\");\r\n});\r\n\r\npm.test(\"Response deve conter _id\", function () {\r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id)\r\n        .to.be.a(\"string\")\r\n        .and.not.empty;\r\n});\r\n\r\npm.test(\"Response retornar 'Já existe produto com esse nome'\", function(){\r\n    const response = pm.response.json;\r\n\r\n    pm.expect(response.message).to.eql(\"Já existe produto com esse nome\");\r\n})\r\n\r\npm.environment.set(\"productId\", response._id);"
+                  "pm.test(\"Status code deve ser 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter mensagem\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Produto deve ser criado com sucesso\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Cadastro realizado com sucesso\");\r\n});\r\n\r\npm.test(\"Response deve conter _id\", function () {\r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id)\r\n        .to.be.a(\"string\")\r\n        .and.not.empty;\r\n});\r\n\r\n\r\npm.environment.set(\"productId\", response._id);"
                 ]
               }
             }

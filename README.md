@@ -630,38 +630,33 @@ api-testing-postman/
 
 ## Próximas etapas
 
-1. Executar a Collection completa.
-2. Atualizar evidências e documentação.
-3. Revisar variáveis e credenciais antes do commit.
-4. Integrar a execução ao processo de versionamento.
+- manutenção evolutiva dos testes;
+- expansão da cobertura de cenários negativos;
+- inclusão de novos recursos da API;
+- integração contínua da execução da Collection.
 
 ---
 
 ## Status do projeto
 
-O projeto está em desenvolvimento incremental.
+O projeto foi concluído em sua primeira versão funcional.
 
 ### Implementado
 
-- Collection organizada;
+- Collection organizada por domínio funcional;
 - Environment configurado;
-- variável `baseurl`;
-- CRUD de usuários;
+- parametrização da URL base;
+- criação, consulta, atualização e exclusão de usuários;
 - cenários positivos e negativos para usuários;
 - criação de usuário administrador;
 - autenticação com login;
 - captura e reutilização de token;
-- CRUD de produtos;
-- consulta de produto após atualização;
-- confirmação de produto excluído;
+- criação, consulta, atualização e exclusão de produtos;
+- validação dos registros após atualização;
+- validação dos registros após exclusão;
 - assertions automatizadas;
 - geração de dados dinâmicos;
 - request chaining com `userId`, `authToken` e `productId`;
-- documentação dos casos de teste.
-
-### Em desenvolvimento
-
 - execução completa da Collection;
-- atualização das evidências;
-- revisão final do projeto;
-- integração da execução ao processo de versionamento.
+- documentação dos casos de teste;
+- registro das evidências de execução.
