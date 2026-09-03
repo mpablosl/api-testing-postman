@@ -1,0 +1,16 @@
+{
+  "name": "api-testing-postman",
+  "version": "1.0.0",
+  "description": "Este projeto demonstra a aplicação prática de testes de API utilizando Postman, ServeRest, JavaScript e Git.",
+  "main": "index.js",
+  "scripts": {
+    "test:api": "newman run \"collections/ServeRest - API Testing.postman_collection.json\" --env-var \"baseurl=https://serverest.dev\" --reporters cli,htmlextra --reporter-htmlextra-export \"evidence/01-collection-run/newman-report.html\""
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "devDependencies": {
+    "newman": "^6.2.2",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}

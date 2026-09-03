@@ -660,3 +660,18 @@ O projeto foi concluído em sua primeira versão funcional.
 - execução completa da Collection;
 - documentação dos casos de teste;
 - registro das evidências de execução.
+
+---
+
+# Execução automatizada com Newman
+
+| Indicador | Resultado |
+|---|---:|
+| Requests executadas | 15 |
+| Assertions executadas | 74 |
+| Assertions aprovadas | 74 |
+| Falhas | 0 |
+| Duração total | 4,3 segundos |
+| Tempo médio de resposta | 196 ms |
+
+A Collection foi executada com sucesso pelo Newman, sem falhas nas assertions.

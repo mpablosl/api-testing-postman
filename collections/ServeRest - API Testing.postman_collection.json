@@ -11,6 +11,91 @@
       "name": "Authentication",
       "item": [
         {
+          "name": "Create Admin User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();\r",
+                  "\r",
+                  "const adminName = `QA Admin ${timestamp}`;\r",
+                  "const adminEmail = `qaadmin${timestamp}@example.com`;\r",
+                  "const adminPassword = \"SenhaAdmin@123\";\r",
+                  "\r",
+                  "pm.environment.set(\"adminUserName\", adminName);\r",
+                  "pm.environment.set(\"adminUserEmail\", adminEmail);\r",
+                  "pm.environment.set(\"adminUserPassword\", adminPassword);\r",
+                  "\r",
+                  "console.log(\"Admin email:\", adminEmail);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code deve ser '201 Created'\", function(){\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Mensagem de sucesso deve ser retornada\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.message).to.eql('Cadastro realizado com sucesso')\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response deve conter ID\", function(){\r",
+                  "\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response).to.have.property('_id');\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Propriedade Id deve ser string e não pode ser vazio\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response._id).to.be.a('string').not.be.empty;\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"{{adminUserName}}\",\r\n    \"email\": \"{{adminUserEmail}}\",\r\n    \"password\": \"{{adminUserPassword}}\",\r\n    \"administrador\": \"true\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/usuarios/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "usuarios",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Login",
           "event": [
             {
@@ -571,91 +656,6 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "Create Admin User",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  "const timestamp = Date.now();\r",
-                  "\r",
-                  "const adminName = `QA Admin ${timestamp}`;\r",
-                  "const adminEmail = `qaadmin${timestamp}@example.com`;\r",
-                  "const adminPassword = \"SenhaAdmin@123\";\r",
-                  "\r",
-                  "pm.environment.set(\"adminUserName\", adminName);\r",
-                  "pm.environment.set(\"adminUserEmail\", adminEmail);\r",
-                  "pm.environment.set(\"adminUserPassword\", adminPassword);\r",
-                  "\r",
-                  "console.log(\"Admin email:\", adminEmail);"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code deve ser '201 Created'\", function(){\r",
-                  "    pm.response.to.have.status(201);\r",
-                  "})\r",
-                  "\r",
-                  "pm.test(\"Mensagem de sucesso deve ser retornada\", function(){\r",
-                  "    const response = pm.response.json();\r",
-                  "\r",
-                  "    pm.expect(response.message).to.eql('Cadastro realizado com sucesso')\r",
-                  "})\r",
-                  "\r",
-                  "pm.test(\"Response deve conter ID\", function(){\r",
-                  "\r",
-                  "    const response = pm.response.json();\r",
-                  "\r",
-                  "    pm.expect(response).to.have.property('_id');\r",
-                  "})\r",
-                  "\r",
-                  "pm.test(\"Propriedade Id deve ser string e não pode ser vazio\", function(){\r",
-                  "    const response = pm.response.json();\r",
-                  "\r",
-                  "    pm.expect(response._id).to.be.a('string').not.be.empty;\r",
-                  "})"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"nome\": \"{{adminUserName}}\",\r\n    \"email\": \"{{adminUserEmail}}\",\r\n    \"password\": \"{{adminUserPassword}}\",\r\n    \"administrador\": \"true\"\r\n}\r\n",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseurl}}/usuarios/",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "usuarios",
-                ""
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
@@ -749,35 +749,6 @@
           "response": []
         },
         {
-          "name": "Get Product",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code deve retornar 200\", function(){\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve ser formato JSON\", function(){\r\n    pm.response.to.be.json;\r\n});\r\n\r\n\r\nconst productId = pm.environment.get(\"productId\"); // Get the productId from the environment variable\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter o _id consultado\", function(){    \r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id).to.eql(productId)\r\n})\r\n\r\npm.test(\"Response deve conter o nome do produto\", function(){\r\n    pm.expect(response).to.have.property(\"nome\");\r\n    pm.expect(response.nome).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Response deve conter preço do produto e ser númerico\", function(){\r\n    pm.expect(response).to.have.property(\"preco\");\r\n    pm.expect(response.preco).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"Produto deve conter descrição\", function () {\r\n    pm.expect(response).to.have.property(\"descricao\");\r\n    pm.expect(response.descricao).to.be.a(\"string\");\r\n});\r\n\r\npm.test(\"Produto deve conter quantidade numérica\", function () {\r\n    pm.expect(response).to.have.property(\"quantidade\");\r\n    pm.expect(response.quantidade).to.be.a(\"number\");\r\n});\r\n\r\n\r\n"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseurl}}/produtos/{{productId}}",
-              "host": [
-                "{{baseurl}}"
-              ],
-              "path": [
-                "produtos",
-                "{{productId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Create Product",
           "event": [
             {
@@ -839,6 +810,35 @@
           "response": []
         },
         {
+          "name": "Get Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve retornar 200\", function(){\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve ser formato JSON\", function(){\r\n    pm.response.to.be.json;\r\n});\r\n\r\n\r\nconst productId = pm.environment.get(\"productId\"); // Get the productId from the environment variable\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter o _id consultado\", function(){    \r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id).to.eql(productId)\r\n})\r\n\r\npm.test(\"Response deve conter o nome do produto\", function(){\r\n    pm.expect(response).to.have.property(\"nome\");\r\n    pm.expect(response.nome).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Response deve conter preço do produto e ser númerico\", function(){\r\n    pm.expect(response).to.have.property(\"preco\");\r\n    pm.expect(response.preco).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"Produto deve conter descrição\", function () {\r\n    pm.expect(response).to.have.property(\"descricao\");\r\n    pm.expect(response.descricao).to.be.a(\"string\");\r\n});\r\n\r\npm.test(\"Produto deve conter quantidade numérica\", function () {\r\n    pm.expect(response).to.have.property(\"quantidade\");\r\n    pm.expect(response.quantidade).to.be.a(\"number\");\r\n});\r\n\r\n\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/produtos/{{productId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Product",
           "event": [
             {
@@ -847,6 +847,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code deve ser 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter message\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Mensagem deve indicar alteração realizada\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Registro alterado com sucesso\");\r\n});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();\r\n\r\npm.environment.set(\r\n    \"updatedProductName\",\r\n    `Produto QA Atualizado ${timestamp}`\r\n);\r\n\r\npm.environment.set(\"updatedProductPrice\", \"149\");\r\npm.environment.set(\r\n    \"updatedProductDescription\",\r\n    \"Produto atualizado durante os testes automatizados\"\r\n);\r\npm.environment.set(\"updatedProductQuantity\", \"25\");"
                 ]
               }
             }
@@ -866,7 +875,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"nome\": \"Produto QA Atualizado\",\r\n    \"preco\": 149,\r\n    \"descricao\": \"Produto atualizado durante os testes automatizados\",\r\n    \"quantidade\": 25\r\n}",
+              "raw": "{\r\n    \"nome\": \"{{updatedProductName}}\",\r\n    \"preco\": 149,\r\n    \"descricao\": \"{{updatedProductDescription}}\",\r\n    \"quantidade\": 25\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

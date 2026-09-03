@@ -4,6 +4,7 @@
 *.secret
 secrets/
 credentials/
+node_modules/
 
 # Environments locais do Postman
 *-local.postman_environment.json
