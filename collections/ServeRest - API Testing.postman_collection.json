@@ -12,9 +12,52 @@
       "item": [
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter authorization\", function () {\r\n    pm.expect(response).to.have.property(\"authorization\");\r\n    pm.expect(response.authorization)\r\n        .to.be.a(\"string\")\r\n        .and.not.empty;\r\n});\r\n\r\nconst authorization = response.authorization;\r\n\r\n// Remove \"Bearer \" caso a API o retorne junto com o token\r\nconst token = authorization.replace(/^Bearer\\s+/i, \"\");\r\n\r\npm.environment.set(\"authToken\", token);\r\n\r\nconsole.log(\"Token foi salvo:\", Boolean(token));"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();\r\n\r\npm.variables.set(\"loginEmail\", `qaadmin${timestamp}@example.com`);\r\npm.variables.set(\"loginPassword\", \"SenhaAdmin@123\");\r\n\r\npm.environment.set(\r\n    \"adminUserEmail\",\r\n    pm.variables.get(\"adminUserEmail\")\r\n);\r\n\r\npm.environment.set(\r\n    \"adminUserPassword\",\r\n    pm.variables.get(\"adminUserPassword\")\r\n);\r\n\r\n\r\nconsole.log(\r\n    \"Email utilizado no login:\",\r\n    pm.environment.get(\"adminUserEmail\")\r\n);\r\n\r\nconsole.log(\r\n    \"Senha preenchida:\",\r\n    Boolean(pm.environment.get(\"adminUserPassword\"))\r\n);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": []
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"{{adminUserEmail}}\",\r\n  \"password\": \"{{adminUserPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/login",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
           },
           "response": []
         }
@@ -48,6 +91,12 @@
                   "    pm.expect(response).to.have.property(\"usuarios\");\r",
                   "});\r",
                   "\r",
+                  "pm.test(\"Response deve conter a atributo nome\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.usuarios[0]).to.have.property('nome');\r",
+                  "});\r",
+                  "\r",
                   "pm.test(\"A propriedade usuarios deve ser um array\", function(){\r",
                   "    const response = pm.response.json();\r",
                   "    pm.expect(response.usuarios).to.be.an(\"array\");\r",
@@ -63,7 +112,7 @@
                   "    pm.expect(response.quantidade).to.equal(response.usuarios.length);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Cada usuário deve possuir nome e email\", function(usuario){\r",
+                  "pm.test(\"Cada usuário deve possuir nome e email\", function(){\r",
                   "    const response = pm.response.json();\r",
                   "\r",
                   "    response.usuarios.forEach(function(usuario){\r",
@@ -545,6 +594,91 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Create Admin User",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();\r",
+                  "\r",
+                  "const adminName = `QA Admin ${timestamp}`;\r",
+                  "const adminEmail = `qaadmin${timestamp}@example.com`;\r",
+                  "const adminPassword = \"SenhaAdmin@123\";\r",
+                  "\r",
+                  "pm.environment.set(\"adminUserName\", adminName);\r",
+                  "pm.environment.set(\"adminUserEmail\", adminEmail);\r",
+                  "pm.environment.set(\"adminUserPassword\", adminPassword);\r",
+                  "\r",
+                  "console.log(\"Admin email:\", adminEmail);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code deve ser '201 Created'\", function(){\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Mensagem de sucesso deve ser retornada\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.message).to.eql('Cadastro realizado com sucesso')\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Response deve conter ID\", function(){\r",
+                  "\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response).to.have.property('_id');\r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Propriedade Id deve ser string e não pode ser vazio\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response._id).to.be.a('string').not.be.empty;\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"{{adminUserName}}\",\r\n    \"email\": \"{{adminUserEmail}}\",\r\n    \"password\": \"{{adminUserPassword}}\",\r\n    \"administrador\": \"true\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/usuarios/",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "usuarios",
+                ""
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -553,15 +687,82 @@
       "item": [
         {
           "name": "List Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code deve ser 200\", function(){\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve estar em formato JSON\", function(){\r",
+                  "    pm.response.to.be.json;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve conter a propriedade quantidade\", function(){\r",
+                  "\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response).to.be.property(\"quantidade\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response deve conter a propriedade produtos\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response).to.have.property('produtos');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"A propriedade produtos deve ser um array\", function(){\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.produtos).to.be.a('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantidade deve ser um número\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.quantidade).to.be.a('number');\r",
+                  "\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Quantidade deve corresponder ao número de produtos relacionados\", function(){\r",
+                  "\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(response.quantidade).to.equal(response.produtos.length);\r",
+                  "    \r",
+                  "})\r",
+                  "\r",
+                  "pm.test(\"Cada produto deve ter nome, preco, descrição e quantidade\", function(){\r",
+                  "\r",
+                  "    const response = pm.response.json();\r",
+                  "\r",
+                  "    response.produtos.forEach(function(produto){\r",
+                  "        pm.expect(produto).to.have.property('nome');\r",
+                  "        pm.expect(produto).to.have.property('preco');\r",
+                  "        pm.expect(produto).to.have.property('descricao');\r",
+                  "        pm.expect(produto).to.have.property('quantidade');\r",
+                  "        pm.expect(produto).to.have.property('_id');\r",
+                  "    });\r",
+                  "});\r",
+                  "\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://serverest.dev/produtos",
-              "protocol": "https",
+              "raw": "{{baseurl}}/produtos",
               "host": [
-                "serverest",
-                "dev"
+                "{{baseurl}}"
               ],
               "path": [
                 "produtos"
@@ -572,33 +773,217 @@
         },
         {
           "name": "Get Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve retornar 200\", function(){\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve ser formato JSON\", function(){\r\n    pm.response.to.be.json;\r\n});\r\n\r\n\r\nconst productId = pm.environment.get(\"productId\"); // Get the productId from the environment variable\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter o _id consultado\", function(){    \r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id).to.eql(productId)\r\n})\r\n\r\npm.test(\"Response deve conter o nome do produto\", function(){\r\n    pm.expect(response).to.have.property(\"nome\");\r\n    pm.expect(response.nome).to.be.a(\"string\").and.not.empty;\r\n});\r\n\r\npm.test(\"Response deve conter preço do produto e ser númerico\", function(){\r\n    pm.expect(response).to.have.property(\"preco\");\r\n    pm.expect(response.preco).to.be.a(\"number\");\r\n});\r\n\r\npm.test(\"Produto deve conter descrição\", function () {\r\n    pm.expect(response).to.have.property(\"descricao\");\r\n    pm.expect(response.descricao).to.be.a(\"string\");\r\n});\r\n\r\npm.test(\"Produto deve conter quantidade numérica\", function () {\r\n    pm.expect(response).to.have.property(\"quantidade\");\r\n    pm.expect(response.quantidade).to.be.a(\"number\");\r\n});\r\n\r\n\r\n"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/produtos/{{productId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{productId}}"
+              ]
+            }
           },
           "response": []
         },
         {
           "name": "Create Product",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "/* Gerar Dados Dinâmicos para Testes de cadastro de Produtos */\r\n\r\nconst timestamp = Date.now();\r\npm.variables.set('newProdNome', `Produto-${timestamp}`);\r\npm.variables.set('newProdPreco', Math.floor(Math.random() * 1000) + 1);\r\npm.variables.set('newProdDescricao', `Descrição do Produto ${timestamp}`);\r\npm.variables.set('newProdQtde', Math.floor(Math.random() * 10) + 1);\r\n\r\n"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter mensagem\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Produto deve ser criado com sucesso\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Cadastro realizado com sucesso\");\r\n});\r\n\r\npm.test(\"Response deve conter _id\", function () {\r\n    pm.expect(response).to.have.property(\"_id\");\r\n    pm.expect(response._id)\r\n        .to.be.a(\"string\")\r\n        .and.not.empty;\r\n});\r\n\r\npm.test(\"Response retornar 'Já existe produto com esse nome'\", function(){\r\n    const response = pm.response.json;\r\n\r\n    pm.expect(response.message).to.eql(\"Já existe produto com esse nome\");\r\n})\r\n\r\npm.environment.set(\"productId\", response._id);"
+                ]
+              }
+            }
+          ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": []
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"{{newProdNome}}\",\r\n    \"preco\": \"{{newProdPreco}}\",\r\n    \"descricao\": \"{{newProdDescricao}}\",\r\n    \"quantidade\": \"{{newProdQtde}}\"\r\n}\r\n\r\n/*{\r\n    \"nome\": \"Produto QA Teste 2\",\r\n    \"preco\": 99,\r\n    \"descricao\": \"Produto criado para testes automatizados\",\r\n    \"quantidade\": 10\r\n}*/",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/produtos",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
           },
           "response": []
         },
         {
           "name": "Update Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter message\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Mensagem deve indicar alteração realizada\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Registro alterado com sucesso\");\r\n});"
+                ]
+              }
+            }
+          ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
-            "header": []
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"nome\": \"Produto QA Atualizado\",\r\n    \"preco\": 149,\r\n    \"descricao\": \"Produto atualizado durante os testes automatizados\",\r\n    \"quantidade\": 25\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseurl}}/produtos/{{productId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{productId}}"
+              ]
+            }
           },
           "response": []
         },
         {
           "name": "Delete Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter message\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Mensagem deve indicar exclusão realizada\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Registro excluído com sucesso\");\r\n});"
+                ]
+              }
+            }
+          ],
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/produtos/{{productId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Delete Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code deve ser 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response deve estar em formato JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Response deve conter message\", function () {\r\n    pm.expect(response).to.have.property(\"message\");\r\n});\r\n\r\npm.test(\"Response deve informar que o produto não foi encontrado\", function () {\r\n    pm.expect(response.message)\r\n        .to.eql(\"Produto não encontrado\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseurl}}/produtos/{{productId}}",
+              "host": [
+                "{{baseurl}}"
+              ],
+              "path": [
+                "produtos",
+                "{{productId}}"
+              ]
+            }
           },
           "response": []
         }
